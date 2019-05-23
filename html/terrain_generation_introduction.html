@@ -1,0 +1,699 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>Demonstration of Algorithmic Terrain Generation</title><meta name="generator" content="MATLAB 8.0"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2012-12-20"><meta name="DC.source" content="terrain_generation_introduction.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, tt, code { font-size:12px; }
+pre { margin:0px 0px 20px; }
+pre.error { color:red; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>Demonstration of Algorithmic Terrain Generation</h1><!--introduction--><p>This script demonstrates how approximately realistic-looking terrain can be generated with some very simple algorithms. These algorithms are interesting in their simplicity and their strictly-geometrical interpretation. That is, no effort is made to model techtonic plates, erosion, rivers, etc., and yet these features appear to exist nonetheless in the generated terrain. These methods are part of a class known as fractional Brownian motion, fractal generation methods, and several other names and originated with Beno&icirc;t Mandelbrot.</p><p>For instance, the following image was created with a very brief algorithm, and the same type of algorithm that generated the terrain geometry was used to control color variation across the terrain for rock, dirt, vegetation, etc.</p><p><img vspace="5" hspace="5" src="../screenshot.png" alt=""> </p><pre>Tucker McClure
+Copyright 2012, The MathWorks, Inc.</pre><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Basic Terrain Generation</a></li><li><a href="#2">Terrain Points</a></li><li><a href="#3">Meshed Terrain</a></li><li><a href="#4">Realistic-Looking Terrain</a></li><li><a href="#5">Other Uses</a></li><li><a href="#9">Additional Functions</a></li><li><a href="#10">How It Works</a></li><li><a href="#11">Draw New Locations</a></li><li><a href="#12">Vary Heights</a></li><li><a href="#13">Do It Again, Halving Variance</a></li><li><a href="#15">Finally, Add Appropriate Color</a></li><li><a href="#17">Final Comments</a></li></ul></div><h2>Basic Terrain Generation<a name="1"></a></h2><p>First, we'll show how a couple of these methods might be used. We'll then proceed to a discussion of approximately how they work. Finally, we'll wrap up with a few options for controlling the result.</p><pre class="codeinput"><span class="comment">% Create a landscape.</span>
+tic();
+[x, y, h, hm, xm, ym] = generate_terrain(7, 513, 0, 0.1, 0.05);
+toc();
+</pre><pre class="codeoutput">Elapsed time is 1.130235 seconds.
+</pre><h2>Terrain Points<a name="2"></a></h2><p>Plot the triangles represented by all the points. We'll add lighting too to make the detail easier to see.</p><pre class="codeinput">figure(1);
+trisurf(delaunay(x, y), x, y, h);
+colormap <span class="string">jet</span>;                    <span class="comment">% Default color map.</span>
+set(gca, <span class="string">'Position'</span>, [0 0 1 1]); <span class="comment">% Fill the figure window.</span>
+axis <span class="string">equal</span> <span class="string">vis3d</span>;                <span class="comment">% Set aspect ratio.</span>
+shading <span class="string">interp</span>;                  <span class="comment">% Interpolate color across faces.</span>
+camlight <span class="string">left</span>;                   <span class="comment">% Add a light over to the left somewhere.</span>
+lighting <span class="string">gouraud</span>;                <span class="comment">% Use decent lighting.</span>
+</pre><img vspace="5" hspace="5" src="terrain_generation_introduction_01.png" alt=""> <h2>Meshed Terrain<a name="3"></a></h2><p>Plot as a mesh. Note that this is zoomed in on the median off all of the generated points in order to capture the detailed middle instead of the relatively uneventful edges.</p><pre class="codeinput">surf(xm, ym, hm);
+set(gca, <span class="string">'Position'</span>, [0 0 1 1]); <span class="comment">% Fill the figure window.</span>
+axis <span class="string">equal</span> <span class="string">vis3d</span>;                <span class="comment">% Set aspect ratio.</span>
+shading <span class="string">interp</span>;                  <span class="comment">% Interpolate color across faces.</span>
+camlight <span class="string">left</span>;                   <span class="comment">% Add a light over to the left somewhere.</span>
+lighting <span class="string">gouraud</span>;                <span class="comment">% Use decent lighting.</span>
+</pre><img vspace="5" hspace="5" src="terrain_generation_introduction_02.png" alt=""> <h2>Realistic-Looking Terrain<a name="4"></a></h2><p>We can add some natural-looking colors to this. Note that this process uses the same type of underlying algorithm to generate the variation in different colors. E.g., steep areas are likely to be colored as rock, but the variation in the degree to which they take on rock colors and the variation in the rock color itself across the map are both meshes generated by a similar means. That is, areas with a 1 or higher will definitely be colored as rock. Areas with 0 or lower definitely will not. Everything in between is a gradient of rockiness.</p><p>Note that this involves creating multiple meshes for grass, for trees, for rock, for dirt, and for water, so this function consists of numerous calls to generation methods and therefore takes substantially longer than to generate the terrain itself.</p><pre class="codeinput">tic();
+cm = generate_terrain_colors(hm);
+toc();
+
+surf(xm, ym, max(hm, 0), cm);    <span class="comment">% Make figure (and flatten ocean).</span>
+set(gca, <span class="string">'Position'</span>, [0 0 1 1]); <span class="comment">% Fill the figure window.</span>
+axis <span class="string">equal</span> <span class="string">vis3d</span> <span class="string">off</span>;            <span class="comment">% Set aspect ratio and turn off axis.</span>
+shading <span class="string">interp</span>;                  <span class="comment">% Interpolate color across faces.</span>
+material <span class="string">dull</span>;                   <span class="comment">% Mountains aren't shiny.</span>
+camlight <span class="string">left</span>;                   <span class="comment">% Add a light over to the left somewhere.</span>
+lighting <span class="string">gouraud</span>;                <span class="comment">% Use decent lighting.</span>
+</pre><pre class="codeoutput">Elapsed time is 1.606919 seconds.
+</pre><img vspace="5" hspace="5" src="terrain_generation_introduction_03.png" alt=""> <h2>Other Uses<a name="5"></a></h2><p>In addition to generating terrain, these methods can be used to generate other useful topologies. For instance, suppose one were simulating a city's ability to respond to an emergency. These tools could be used to generate a population density map for the city, such that what might be a "mountain" when viewed as terrain is instead a high population area. This population map could be used to generate random emergencies (such that high population areas have more emergencies), stressing the simulated capabilities of the emergency response teams. Other examples might include generation of the corrosion of a metallic surface or of 2D probability density distributions. Consider the following, in which the terrain is automatically generated and a population density map is similarly generated.</p><pre class="codeinput"><span class="comment">% Make the terrain.</span>
+[~, ~, ~, hm, xm, ym] = generate_terrain(7, 513, 0.01, 0.02, 0.05);
+
+<span class="comment">% Create our population density map.</span>
+tic();
+pm = generate_brownian_mesh(9, zeros(2, 2));
+toc();
+
+<span class="comment">% We can't have negative population density or people living underwater.</span>
+pm(pm &lt; 0 | hm &lt; 0) = 0;
+pm = pm.^3;
+
+clf();
+surf(xm, ym, max(hm, 0), 1e3*pm); <span class="comment">% Make figure (and flatten ocean).</span>
+axis <span class="string">equal</span> <span class="string">vis3d</span> <span class="string">off</span>;             <span class="comment">% Set aspect ratio and turn off axis.</span>
+shading <span class="string">interp</span>;                   <span class="comment">% Interpolate color across faces.</span>
+material <span class="string">dull</span>;                    <span class="comment">% Mountains aren't shiny.</span>
+camlight <span class="string">left</span>;                    <span class="comment">% Add a light over to the left somewhere.</span>
+lighting <span class="string">gouraud</span>;                 <span class="comment">% Use decent lighting.</span>
+title(colorbar(), <span class="string">'Population Density (inhabitants/km^2)'</span>);
+</pre><pre class="codeoutput">Elapsed time is 0.043392 seconds.
+</pre><img vspace="5" hspace="5" src="terrain_generation_introduction_04.png" alt=""> <p>Notice that for terrain, we use <tt>generate_terrain</tt>, but for the population data, we use <tt>generate_brownian_mesh</tt>, which is faster, but slightly less terrain-like. Note also that care was taken to ensure the population map size was the same size as the terrain map. We requested a 513-by-513 mesh for the terrain, and the <tt>generate_brownian_mesh</tt> produces a mesh of size <img src="terrain_generation_introduction_eq19132.png" alt="$2^n+1$"> by <img src="terrain_generation_introduction_eq19132.png" alt="$2^n+1$">, where <img src="terrain_generation_introduction_eq25947.png" alt="$n$"> is the first argument. This is due to the way the mesh doubles from its initial condition every iteration.</p><p>We'll use the population map to generate random emergencies, which are more likely in high-population areas. These methods can be used to simulate realistic conditions for operations research or optimization problems.</p><pre class="codeinput">hold <span class="string">on</span>;
+cdf = cumsum(pm(:)) / sum(pm(:)); <span class="comment">% Cumulative distribution of population</span>
+<span class="keyword">for</span> k = 1:1000
+    index = find(rand() &lt; cdf, 1, <span class="string">'first'</span>); <span class="comment">% Draw a random emergency.</span>
+    plot3(xm(index), ym(index), hm(index), <span class="string">'k.'</span>); <span class="comment">% Show it.</span>
+<span class="keyword">end</span>
+hold <span class="string">off</span>;
+title(<span class="string">'Simulated Emergencies According to Population Density'</span>);
+</pre><img vspace="5" hspace="5" src="terrain_generation_introduction_05.png" alt=""> <p>Here's corrosion on a metallic surface. This might be used to generate geometry for a finite element analysis engine to demonstrate various types of fracture/failure modes.</p><pre class="codeinput">[xm, ym, zm] = generate_brownian_mesh(8, 0.0*ones(2, 2));
+xm(xm &lt; 0) = 0;
+xm = 0.02*xm;
+zm = 0.25*zm;
+clf();
+h_corrosion = patch(surf2patch(xm, ym, zm, 0.75*ones([size(xm) 3])));
+patch(<span class="string">'Vertices'</span>, [xm(:, 1) ym(:, 1) zm(:, 1); <span class="keyword">...</span>
+                   0.05        0        0.25; <span class="keyword">...</span>
+                   0.05        0        0], <span class="keyword">...</span>
+      <span class="string">'Faces'</span>, 1:size(xm, 1)+2, <span class="keyword">...</span>
+      <span class="string">'FaceVertexCData'</span>, 0.75*ones([size(xm, 1)+2 3]));
+patch(<span class="string">'Vertices'</span>, [xm(:, end) ym(:, end) zm(:, end); <span class="keyword">...</span>
+                   0.05        1        0.25; <span class="keyword">...</span>
+                   0.05        1        0], <span class="keyword">...</span>
+      <span class="string">'Faces'</span>, 1:size(xm, 1)+2, <span class="keyword">...</span>
+      <span class="string">'FaceVertexCData'</span>, 0.75*ones([size(xm, 1)+2 3]));
+patch(<span class="string">'Vertices'</span>, [xm(1, :)' ym(1, :)' zm(1, :)'; <span class="keyword">...</span>
+                   0.05        1        0; <span class="keyword">...</span>
+                   0.05        0        0], <span class="keyword">...</span>
+      <span class="string">'Faces'</span>, 1:size(xm, 1)+2, <span class="keyword">...</span>
+      <span class="string">'FaceVertexCData'</span>, 0.75*ones([size(xm, 1)+2 3]));
+patch(<span class="string">'Vertices'</span>, [xm(end, :)' ym(end, :)' zm(end, :)'; <span class="keyword">...</span>
+                   0.05        1        0.25; <span class="keyword">...</span>
+                   0.05        0        0.25], <span class="keyword">...</span>
+      <span class="string">'Faces'</span>, 1:size(xm, 1)+2, <span class="keyword">...</span>
+      <span class="string">'FaceVertexCData'</span>, 0.75*ones([size(xm, 1)+2 3]));
+patch(<span class="string">'Vertices'</span>, [0.05 0 0; <span class="keyword">...</span>
+                   0.05 1 0; <span class="keyword">...</span>
+                   0.05 1 0.25; <span class="keyword">...</span>
+                   0.05 0 0.25], <span class="keyword">...</span>
+      <span class="string">'Faces'</span>, 1:4, <span class="keyword">...</span>
+      <span class="string">'FaceVertexCData'</span>, 0.75*ones([4 3]));
+view(3);
+set(gca(), <span class="string">'Projection'</span>, <span class="string">'perspective'</span>);
+axis <span class="string">equal</span> <span class="string">vis3d</span>;
+shading <span class="string">flat</span>;
+material([0 1 1]);
+camlight <span class="string">left</span>;
+lighting <span class="string">phong</span>;
+</pre><img vspace="5" hspace="5" src="terrain_generation_introduction_06.png" alt=""> <h2>Additional Functions<a name="9"></a></h2><p>Several algorithms are included:</p><div><ul><li><tt>generate_brownian_mesh</tt>  - Fastest, varies more along grid lines</li><li><tt>generate_brownian_tri</tt>   - Slower, but gridless</li><li><tt>generate_terrain</tt>        - Slowest, but best for terrain in particular</li></ul></div><p>Several terrain-oriented tools are also included, mostly for fun:</p><div><ul><li><tt>generate_scene</tt>          - Creates and colors terrain</li><li><tt>generate_terrain_colors</tt> - Generate colors for a terrain map</li><li><tt>render_random_scenes</tt>    - Produces and saves several terrain scenes</li><li><tt>sun_tones</tt>               - Generates appropriate sky color for time</li></ul></div><p>A general utility, <tt>FigureRotator</tt>, is included as well. This allows a user to rotate around a target point, move in and out, and zoom in and out. It's available separately on FileExchange. See <tt>help FigureRotator</tt>.</p><h2>How It Works<a name="10"></a></h2><p>The terrain generation is easy to understand. Let's start with a few random points somewhere near (0, 0). When we plot it, we'll add points around the edges to make a square.</p><pre class="codeinput">x = 0.25 * randn(3, 1);
+y = 0.25 * randn(3, 1);
+h = 0.1*randn(3, 1);
+trisurf(delaunay([-1; -1; 1; 1; x], [-1; 1; -1; 1; y]), <span class="keyword">...</span>
+        [-1; -1; 1; 1; x], [-1; 1; -1; 1; y], [0; 0; 0; 0; h]);
+axis <span class="string">equal</span> <span class="string">vis3d</span>;
+set(gca, <span class="string">'Projection'</span>, <span class="string">'perspective'</span>);
+</pre><img vspace="5" hspace="5" src="terrain_generation_introduction_07.png" alt=""> <h2>Draw New Locations<a name="11"></a></h2><p>We'll pick three new locations per point and find what height those points are currently.</p><pre class="codeinput"><span class="comment">% Draw random parents for each new point.</span>
+parents = randi(length(x), 1, 3*length(x)); <span class="comment">% Pick parent points.</span>
+
+<span class="comment">% Draw new x, y points. Limit to [0, 1].</span>
+x_new = max(min(x(parents) + 0.5 * randn(3*length(x), 1), 1), -1);
+y_new = max(min(y(parents) + 0.5 * randn(3*length(x), 1), 1), -1);
+
+<span class="comment">% Interpolate to find current height. We'll use an anonymous function here</span>
+<span class="comment">% for brevity and then use it again and again. If this looks unfamiliar,</span>
+<span class="comment">% search for "anonymous functions" in the documentation.</span>
+interpolate = @(x, y, h, x_new, y_new) <span class="keyword">...</span>
+    feval(@(int) int(x_new, y_new), <span class="keyword">...</span>
+          TriScatteredInterp([-1; -1; 1; 1; x], <span class="keyword">...</span>
+                             [-1; 1; -1; 1; y], <span class="keyword">...</span>
+                             [0; 0; 0; 0; h]));
+h_new = interpolate(x, y, h, x_new, y_new);
+
+<span class="comment">% Show the new points.</span>
+hold <span class="string">on</span>;
+plot3(x_new, y_new, h_new, <span class="string">'r+'</span>);
+hold <span class="string">off</span>;
+</pre><img vspace="5" hspace="5" src="terrain_generation_introduction_08.png" alt=""> <h2>Vary Heights<a name="12"></a></h2><p>Now we'll vary the heights of those locations.</p><pre class="codeinput">h_new = h_new + 0.1 * randn(3*length(x), 1);
+x = [x; x_new];
+y = [y; y_new];
+h = [h; h_new];
+
+<span class="comment">% We'll use this plot process a lot, so we'll write an anonymouns function</span>
+<span class="comment">% for this too. Again, see the documentation for "anonymous function" if</span>
+<span class="comment">% this looks unfamiliar.</span>
+plot_it = @(x, y, h) trisurf(delaunay([-1; -1; 1; 1; x], <span class="keyword">...</span>
+                                      [-1; 1; -1; 1; y]), <span class="keyword">...</span>
+                             [-1; -1; 1; 1; x], <span class="keyword">...</span>
+                             [-1; 1; -1; 1; y], <span class="keyword">...</span>
+                             [0; 0; 0; 0; h]);
+plot_it(x, y, h);
+axis <span class="string">equal</span> <span class="string">vis3d</span>;
+set(gca, <span class="string">'Projection'</span>, <span class="string">'perspective'</span>);
+
+<span class="comment">% There may be a warning below about duplicate data points. That just means</span>
+<span class="comment">% we generated points outside of the [-1, 1] window and are ignoring them.</span>
+<span class="comment">% The real algorithm doesn't do this, but it's simpler to see the algorithm</span>
+<span class="comment">% without worrying about this detail for now. We'll turn off that</span>
+<span class="comment">% particular warning.</span>
+warning_state = warning(<span class="string">'query'</span>, <span class="string">'MATLAB:delaunay:DupPtsDelaunayWarnId'</span>);
+warning <span class="string">off</span> <span class="string">MATLAB:delaunay:DupPtsDelaunayWarnId</span>
+</pre><img vspace="5" hspace="5" src="terrain_generation_introduction_09.png" alt=""> <h2>Do It Again, Halving Variance<a name="13"></a></h2><p>We'll pick new x and y points, interpolate the find the current heights, and vary those heights. Each random draw will be smaller than the last time through.</p><pre class="codeinput"><span class="comment">% Draw random parents for each new point.</span>
+parents = randi(length(x), 1, 3*length(x)); <span class="comment">% Pick parent points.</span>
+
+<span class="comment">% Draw new x, y points. Limit to [0, 1].</span>
+x_new = max(min(x(parents) + 0.75 * 0.5 * randn(3*length(x), 1), 1), -1);
+y_new = max(min(y(parents) + 0.75 * 0.5 * randn(3*length(x), 1), 1), -1);
+
+<span class="comment">% Interpolate to find current height.</span>
+h_new = interpolate(x, y, h, x_new, y_new);
+
+<span class="comment">% Show the new points.</span>
+hold <span class="string">on</span>;
+plot3(x_new, y_new, h_new, <span class="string">'r+'</span>);
+hold <span class="string">off</span>;
+snapnow();
+
+<span class="comment">% Vary the heights.</span>
+h_new = h_new + 0.5 * 0.1 * randn(3*length(x), 1);
+x = [x; x_new];
+y = [y; y_new];
+h = [h; h_new];
+
+<span class="comment">% Show the new surface.</span>
+plot_it(x, y, h);
+axis <span class="string">equal</span> <span class="string">vis3d</span>;
+set(gca, <span class="string">'Projection'</span>, <span class="string">'perspective'</span>);
+</pre><img vspace="5" hspace="5" src="terrain_generation_introduction_10.png" alt=""> <img vspace="5" hspace="5" src="terrain_generation_introduction_11.png" alt=""> <p>The process can continue for several iterations, adding finer and finer detail.</p><pre class="codeinput"><span class="keyword">for</span> k = 2:5
+
+    <span class="comment">% Pick parent points.</span>
+    parents = randi(length(x), 1, 3*length(x));
+
+    <span class="comment">% Draw new x, y points. Limit to [0, 1].</span>
+    d = 0.75^k;
+    x_new = max(min(x(parents) + d * 0.5 * randn(3*length(x), 1), 1), -1);
+    y_new = max(min(y(parents) + d * 0.5 * randn(3*length(x), 1), 1), -1);
+
+    <span class="comment">% Interpolate to find current height.</span>
+    h_new = interpolate(x, y, h, x_new, y_new);
+
+    hold <span class="string">on</span>;
+    plot3(x_new, y_new, h_new, <span class="string">'r+'</span>);
+    hold <span class="string">off</span>;
+    snapnow();
+
+    <span class="comment">% Vary the heights by half as much as last time.</span>
+    h_new = h_new + 0.5^k * 0.1 * randn(3*length(x), 1);
+    x = [x; x_new]; <span class="comment">%#ok&lt;AGROW&gt;</span>
+    y = [y; y_new]; <span class="comment">%#ok&lt;AGROW&gt;</span>
+    h = [h; h_new]; <span class="comment">%#ok&lt;AGROW&gt;</span>
+
+    plot_it(x, y, h);
+    axis <span class="string">equal</span> <span class="string">vis3d</span>;
+    set(gca, <span class="string">'Projection'</span>, <span class="string">'perspective'</span>);
+    snapnow();
+
+<span class="keyword">end</span>
+</pre><img vspace="5" hspace="5" src="terrain_generation_introduction_12.png" alt=""> <img vspace="5" hspace="5" src="terrain_generation_introduction_13.png" alt=""> <img vspace="5" hspace="5" src="terrain_generation_introduction_14.png" alt=""> <img vspace="5" hspace="5" src="terrain_generation_introduction_15.png" alt=""> <pre class="codeoutput">Warning: Duplicate data points have been detected and removed - corresponding
+values have been averaged.
+(Type "warning off MATLAB:TriScatteredInterp:DupPtsAvValuesWarnId" to suppress
+this warning.) 
+</pre><img vspace="5" hspace="5" src="terrain_generation_introduction_16.png" alt=""> <img vspace="5" hspace="5" src="terrain_generation_introduction_17.png" alt=""> <pre class="codeoutput">Warning: Duplicate data points have been detected and removed - corresponding
+values have been averaged.
+(Type "warning off MATLAB:TriScatteredInterp:DupPtsAvValuesWarnId" to suppress
+this warning.) 
+</pre><img vspace="5" hspace="5" src="terrain_generation_introduction_18.png" alt=""> <img vspace="5" hspace="5" src="terrain_generation_introduction_19.png" alt=""> <h2>Finally, Add Appropriate Color<a name="15"></a></h2><pre class="codeinput"><span class="comment">% Chop off anything below 0 (we can interpret this as sea level).</span>
+h(h &lt; 0) = 0;
+plot_it(x, y, h);
+axis <span class="string">equal</span> <span class="string">vis3d</span>;
+set(gca, <span class="string">'Projection'</span>, <span class="string">'perspective'</span>);
+
+<span class="comment">% We can use the colormap from the "cape" example that ships with MATLAB.</span>
+colormap(getfield(load(<span class="string">'cape'</span>, <span class="string">'map'</span>), <span class="string">'map'</span>)); <span class="comment">%#ok&lt;GFLD&gt;</span>
+shading <span class="string">interp</span>;
+material <span class="string">dull</span>;
+camlight <span class="string">left</span>;
+lighting <span class="string">gouraud</span>;
+</pre><img vspace="5" hspace="5" src="terrain_generation_introduction_20.png" alt=""> <p>Now we have a landscape.</p><p>A few details were omitted here for simplicity. For instance, the real algorithm doesn't clamp the corners to all be at 0 height. Also, points are free to sprawl across space and aren't limited to [-1, 1] like they are here. This is why results from the functions will look a little different than what we've pieced together in this explanation. The fundamentals of the algorithm, however, are represented.</p><pre class="codeinput"><span class="comment">% Return the state of the warning about duplicates.</span>
+warning(warning_state.state, <span class="string">'MATLAB:delaunay:DupPtsDelaunayWarnId'</span>);
+</pre><h2>Final Comments<a name="17"></a></h2><p>We looked at a few applications of these procedural generation methods to create realistic terrain, population data with random events, and corrosion, and we further discussed what's behind these methods. For more information, see "Fractal landscape", "Brownian surface", or "Procedural generation" on Wikipedia or browse the wealth of resources produced by Beno&icirc;t Mandelbrot on fractals and roughness. Going beyond the three included algorithms, it's easy to create a new or customized algorithm for a given purpose. Lateral thinking in this field is highly encouraged!</p><p>Here are three final scenes, showing a few types of behaviour that can result from these algorithms.</p><pre class="codeinput"><span class="keyword">for</span> k = 1:3
+    tic();
+    example_scene;
+    toc();
+    snapnow();
+<span class="keyword">end</span>
+</pre><pre class="codeoutput">Elapsed time is 4.811143 seconds.
+</pre><img vspace="5" hspace="5" src="terrain_generation_introduction_21.png" alt=""> <pre class="codeoutput">Elapsed time is 3.878252 seconds.
+</pre><img vspace="5" hspace="5" src="terrain_generation_introduction_22.png" alt=""> <pre class="codeoutput">Elapsed time is 4.845763 seconds.
+</pre><img vspace="5" hspace="5" src="terrain_generation_introduction_23.png" alt=""> <p>Thanks for downloading.</p><p>- Tucker McClure</p><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2012b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% Demonstration of Algorithmic Terrain Generation
+%
+% This script demonstrates how approximately realistic-looking terrain can
+% be generated with some very simple algorithms. These algorithms are
+% interesting in their simplicity and their strictly-geometrical
+% interpretation. That is, no effort is made to model techtonic plates, 
+% erosion, rivers, etc., and yet these features appear to exist
+% nonetheless in the generated terrain. These methods are part of a class
+% known as fractional Brownian motion, fractal generation methods, and
+% several other names and originated with Benoît Mandelbrot.
+%
+% For instance, the following image was created with a very brief
+% algorithm, and the same type of algorithm that generated the terrain
+% geometry was used to control color variation across the terrain for rock,
+% dirt, vegetation, etc.
+% 
+% <<../screenshot.png>>
+% 
+%  Tucker McClure
+%  Copyright 2012, The MathWorks, Inc.
+
+%% Basic Terrain Generation
+% First, we'll show how a couple of these methods might be used. We'll then
+% proceed to a discussion of approximately how they work. Finally, we'll
+% wrap up with a few options for controlling the result.
+
+% Create a landscape.
+tic();
+[x, y, h, hm, xm, ym] = generate_terrain(7, 513, 0, 0.1, 0.05);
+toc();
+
+%% Terrain Points
+% Plot the triangles represented by all the points. We'll add lighting too
+% to make the detail easier to see.
+figure(1);
+trisurf(delaunay(x, y), x, y, h);
+colormap jet;                    % Default color map.
+set(gca, 'Position', [0 0 1 1]); % Fill the figure window.
+axis equal vis3d;                % Set aspect ratio.
+shading interp;                  % Interpolate color across faces.
+camlight left;                   % Add a light over to the left somewhere.
+lighting gouraud;                % Use decent lighting.
+
+%% Meshed Terrain
+% Plot as a mesh. Note that this is zoomed in on the median off all of the
+% generated points in order to capture the detailed middle instead of the
+% relatively uneventful edges.
+surf(xm, ym, hm);
+set(gca, 'Position', [0 0 1 1]); % Fill the figure window.
+axis equal vis3d;                % Set aspect ratio.
+shading interp;                  % Interpolate color across faces.
+camlight left;                   % Add a light over to the left somewhere.
+lighting gouraud;                % Use decent lighting.
+
+%% Realistic-Looking Terrain
+% We can add some natural-looking colors to this. Note that this process
+% uses the same type of underlying algorithm to generate the variation in
+% different colors. E.g., steep areas are likely to be colored as rock, but
+% the variation in the degree to which they take on rock colors and the
+% variation in the rock color itself across the map are both meshes
+% generated by a similar means. That is, areas with a 1 or higher will
+% definitely be colored as rock. Areas with 0 or lower definitely will not.
+% Everything in between is a gradient of rockiness.
+%
+% Note that this involves creating multiple meshes for grass, for trees,
+% for rock, for dirt, and for water, so this function consists of numerous
+% calls to generation methods and therefore takes substantially longer than
+% to generate the terrain itself.
+
+tic();
+cm = generate_terrain_colors(hm);
+toc();
+
+surf(xm, ym, max(hm, 0), cm);    % Make figure (and flatten ocean).
+set(gca, 'Position', [0 0 1 1]); % Fill the figure window.
+axis equal vis3d off;            % Set aspect ratio and turn off axis.
+shading interp;                  % Interpolate color across faces.
+material dull;                   % Mountains aren't shiny.
+camlight left;                   % Add a light over to the left somewhere.
+lighting gouraud;                % Use decent lighting.
+
+%% Other Uses
+% In addition to generating terrain, these methods can be used to generate
+% other useful topologies. For instance, suppose one were simulating a
+% city's ability to respond to an emergency. These tools could be used to
+% generate a population density map for the city, such that what might be a
+% "mountain" when viewed as terrain is instead a high population area. This
+% population map could be used to generate random emergencies (such that
+% high population areas have more emergencies), stressing the simulated
+% capabilities of the emergency response teams. Other examples might 
+% include generation of the corrosion of a metallic surface or of 2D
+% probability density distributions. Consider the following, in which the
+% terrain is automatically generated and a population density map is
+% similarly generated.
+
+% Make the terrain.
+[~, ~, ~, hm, xm, ym] = generate_terrain(7, 513, 0.01, 0.02, 0.05);
+
+% Create our population density map.
+tic();
+pm = generate_brownian_mesh(9, zeros(2, 2));
+toc();
+
+% We can't have negative population density or people living underwater.
+pm(pm < 0 | hm < 0) = 0;
+pm = pm.^3;
+
+clf();
+surf(xm, ym, max(hm, 0), 1e3*pm); % Make figure (and flatten ocean).
+axis equal vis3d off;             % Set aspect ratio and turn off axis.
+shading interp;                   % Interpolate color across faces.
+material dull;                    % Mountains aren't shiny.
+camlight left;                    % Add a light over to the left somewhere.
+lighting gouraud;                 % Use decent lighting.
+title(colorbar(), 'Population Density (inhabitants/km^2)');
+
+%%
+% Notice that for terrain, we use |generate_terrain|, but for the 
+% population data, we use |generate_brownian_mesh|, which is faster, but
+% slightly less terrain-like. Note also that care was taken to ensure the
+% population map size was the same size as the terrain map. We requested a
+% 513-by-513 mesh for the terrain, and the |generate_brownian_mesh|
+% produces a mesh of size $2^n+1$ by $2^n+1$, where $n$ is the first
+% argument. This is due to the way the mesh doubles from its initial
+% condition every iteration.
+
+%%
+% We'll use the population map to generate random emergencies, which are
+% more likely in high-population areas. These methods can be used to
+% simulate realistic conditions for operations research or optimization
+% problems.
+
+hold on;
+cdf = cumsum(pm(:)) / sum(pm(:)); % Cumulative distribution of population
+for k = 1:1000
+    index = find(rand() < cdf, 1, 'first'); % Draw a random emergency.
+    plot3(xm(index), ym(index), hm(index), 'k.'); % Show it.
+end
+hold off;
+title('Simulated Emergencies According to Population Density');
+
+%%
+% Here's corrosion on a metallic surface. This might be used to generate
+% geometry for a finite element analysis engine to demonstrate various
+% types of fracture/failure modes.
+
+[xm, ym, zm] = generate_brownian_mesh(8, 0.0*ones(2, 2));
+xm(xm < 0) = 0;
+xm = 0.02*xm;
+zm = 0.25*zm;
+clf();
+h_corrosion = patch(surf2patch(xm, ym, zm, 0.75*ones([size(xm) 3])));
+patch('Vertices', [xm(:, 1) ym(:, 1) zm(:, 1); ...
+                   0.05        0        0.25; ...
+                   0.05        0        0], ...
+      'Faces', 1:size(xm, 1)+2, ...
+      'FaceVertexCData', 0.75*ones([size(xm, 1)+2 3]));
+patch('Vertices', [xm(:, end) ym(:, end) zm(:, end); ...
+                   0.05        1        0.25; ...
+                   0.05        1        0], ...
+      'Faces', 1:size(xm, 1)+2, ...
+      'FaceVertexCData', 0.75*ones([size(xm, 1)+2 3]));
+patch('Vertices', [xm(1, :)' ym(1, :)' zm(1, :)'; ...
+                   0.05        1        0; ...
+                   0.05        0        0], ...
+      'Faces', 1:size(xm, 1)+2, ...
+      'FaceVertexCData', 0.75*ones([size(xm, 1)+2 3]));
+patch('Vertices', [xm(end, :)' ym(end, :)' zm(end, :)'; ...
+                   0.05        1        0.25; ...
+                   0.05        0        0.25], ...
+      'Faces', 1:size(xm, 1)+2, ...
+      'FaceVertexCData', 0.75*ones([size(xm, 1)+2 3]));
+patch('Vertices', [0.05 0 0; ...
+                   0.05 1 0; ...
+                   0.05 1 0.25; ...
+                   0.05 0 0.25], ...
+      'Faces', 1:4, ...
+      'FaceVertexCData', 0.75*ones([4 3]));
+view(3);
+set(gca(), 'Projection', 'perspective');
+axis equal vis3d;
+shading flat;
+material([0 1 1]);
+camlight left;
+lighting phong;
+
+%% Additional Functions
+% Several algorithms are included:
+% 
+% * |generate_brownian_mesh|  - Fastest, varies more along grid lines
+% * |generate_brownian_tri|   - Slower, but gridless
+% * |generate_terrain|        - Slowest, but best for terrain in particular
+%
+% Several terrain-oriented tools are also included, mostly for fun:
+% 
+% * |generate_scene|          - Creates and colors terrain
+% * |generate_terrain_colors| - Generate colors for a terrain map
+% * |render_random_scenes|    - Produces and saves several terrain scenes
+% * |sun_tones|               - Generates appropriate sky color for time
+%
+% A general utility, |FigureRotator|, is included as well. This allows a
+% user to rotate around a target point, move in and out, and zoom in and
+% out. It's available separately on FileExchange. See |help FigureRotator|.
+
+%% How It Works
+% The terrain generation is easy to understand. Let's start with a few
+% random points somewhere near (0, 0). When we plot it, we'll add points
+% around the edges to make a square.
+
+x = 0.25 * randn(3, 1);
+y = 0.25 * randn(3, 1);
+h = 0.1*randn(3, 1);
+trisurf(delaunay([-1; -1; 1; 1; x], [-1; 1; -1; 1; y]), ...
+        [-1; -1; 1; 1; x], [-1; 1; -1; 1; y], [0; 0; 0; 0; h]);
+axis equal vis3d;
+set(gca, 'Projection', 'perspective');
+
+%% Draw New Locations
+% We'll pick three new locations per point and find what height those
+% points are currently.
+
+% Draw random parents for each new point.
+parents = randi(length(x), 1, 3*length(x)); % Pick parent points.
+
+% Draw new x, y points. Limit to [0, 1].
+x_new = max(min(x(parents) + 0.5 * randn(3*length(x), 1), 1), -1);
+y_new = max(min(y(parents) + 0.5 * randn(3*length(x), 1), 1), -1);
+
+% Interpolate to find current height. We'll use an anonymous function here
+% for brevity and then use it again and again. If this looks unfamiliar,
+% search for "anonymous functions" in the documentation.
+interpolate = @(x, y, h, x_new, y_new) ...
+    feval(@(int) int(x_new, y_new), ...
+          TriScatteredInterp([-1; -1; 1; 1; x], ...
+                             [-1; 1; -1; 1; y], ...
+                             [0; 0; 0; 0; h]));
+h_new = interpolate(x, y, h, x_new, y_new);
+
+% Show the new points.
+hold on;
+plot3(x_new, y_new, h_new, 'r+');
+hold off;
+
+%% Vary Heights
+% Now we'll vary the heights of those locations.
+h_new = h_new + 0.1 * randn(3*length(x), 1);
+x = [x; x_new];
+y = [y; y_new];
+h = [h; h_new];
+
+% We'll use this plot process a lot, so we'll write an anonymouns function
+% for this too. Again, see the documentation for "anonymous function" if
+% this looks unfamiliar.
+plot_it = @(x, y, h) trisurf(delaunay([-1; -1; 1; 1; x], ...
+                                      [-1; 1; -1; 1; y]), ...
+                             [-1; -1; 1; 1; x], ...
+                             [-1; 1; -1; 1; y], ...
+                             [0; 0; 0; 0; h]);
+plot_it(x, y, h);
+axis equal vis3d;
+set(gca, 'Projection', 'perspective');
+
+% There may be a warning below about duplicate data points. That just means
+% we generated points outside of the [-1, 1] window and are ignoring them.
+% The real algorithm doesn't do this, but it's simpler to see the algorithm
+% without worrying about this detail for now. We'll turn off that
+% particular warning.
+warning_state = warning('query', 'MATLAB:delaunay:DupPtsDelaunayWarnId');
+warning off MATLAB:delaunay:DupPtsDelaunayWarnId
+
+%% Do It Again, Halving Variance
+% We'll pick new x and y points, interpolate the find the current heights,
+% and vary those heights. Each random draw will be smaller than the last 
+% time through.
+
+% Draw random parents for each new point.
+parents = randi(length(x), 1, 3*length(x)); % Pick parent points.
+
+% Draw new x, y points. Limit to [0, 1].
+x_new = max(min(x(parents) + 0.75 * 0.5 * randn(3*length(x), 1), 1), -1);
+y_new = max(min(y(parents) + 0.75 * 0.5 * randn(3*length(x), 1), 1), -1);
+
+% Interpolate to find current height.
+h_new = interpolate(x, y, h, x_new, y_new);
+
+% Show the new points.
+hold on;
+plot3(x_new, y_new, h_new, 'r+');
+hold off;
+snapnow();
+
+% Vary the heights.
+h_new = h_new + 0.5 * 0.1 * randn(3*length(x), 1);
+x = [x; x_new];
+y = [y; y_new];
+h = [h; h_new];
+
+% Show the new surface.
+plot_it(x, y, h);
+axis equal vis3d;
+set(gca, 'Projection', 'perspective');
+
+%%
+% The process can continue for several iterations, adding finer and finer
+% detail.
+for k = 2:5
+    
+    % Pick parent points.
+    parents = randi(length(x), 1, 3*length(x));
+    
+    % Draw new x, y points. Limit to [0, 1].
+    d = 0.75^k;
+    x_new = max(min(x(parents) + d * 0.5 * randn(3*length(x), 1), 1), -1);
+    y_new = max(min(y(parents) + d * 0.5 * randn(3*length(x), 1), 1), -1);
+
+    % Interpolate to find current height.
+    h_new = interpolate(x, y, h, x_new, y_new);
+    
+    hold on;
+    plot3(x_new, y_new, h_new, 'r+');
+    hold off;
+    snapnow();
+    
+    % Vary the heights by half as much as last time.
+    h_new = h_new + 0.5^k * 0.1 * randn(3*length(x), 1);
+    x = [x; x_new]; %#ok<AGROW>
+    y = [y; y_new]; %#ok<AGROW>
+    h = [h; h_new]; %#ok<AGROW>
+    
+    plot_it(x, y, h);
+    axis equal vis3d;
+    set(gca, 'Projection', 'perspective');
+    snapnow();
+    
+end
+
+%% Finally, Add Appropriate Color
+
+% Chop off anything below 0 (we can interpret this as sea level).
+h(h < 0) = 0;
+plot_it(x, y, h);
+axis equal vis3d;
+set(gca, 'Projection', 'perspective');
+
+% We can use the colormap from the "cape" example that ships with MATLAB.
+colormap(getfield(load('cape', 'map'), 'map')); %#ok<GFLD>
+shading interp;
+material dull;
+camlight left;
+lighting gouraud;
+
+%%
+% Now we have a landscape.
+%
+% A few details were omitted here for simplicity. For instance, the real
+% algorithm doesn't clamp the corners to all be at 0 height. Also, points
+% are free to sprawl across space and aren't limited to [-1, 1] like they
+% are here. This is why results from the functions will look a little
+% different than what we've pieced together in this explanation. The
+% fundamentals of the algorithm, however, are represented.
+
+% Return the state of the warning about duplicates.
+warning(warning_state.state, 'MATLAB:delaunay:DupPtsDelaunayWarnId');
+
+%% Final Comments
+% We looked at a few applications of these procedural generation methods to
+% create realistic terrain, population data with random events, and 
+% corrosion, and we further discussed what's behind these methods. For more
+% information, see "Fractal landscape", "Brownian surface", or "Procedural
+% generation" on Wikipedia or browse the wealth of resources produced by
+% Benoît Mandelbrot on fractals and roughness. Going beyond the three
+% included algorithms, it's easy to create a new or customized algorithm
+% for a given purpose. Lateral thinking in this field is highly encouraged!
+%
+% Here are three final scenes, showing a few types of behaviour that can 
+% result from these algorithms.
+
+for k = 1:3
+    tic();
+    example_scene;
+    toc();
+    snapnow();
+end
+
+%%
+% Thanks for downloading.
+%
+% - Tucker McClure
+
+##### SOURCE END #####
+--></body></html>
